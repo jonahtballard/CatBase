@@ -3,9 +3,12 @@
 Ingest UVM *current* sections CSV into SQLite.
 
 - Schema is section-centric (course → many sections/CRNs), with meetings split out.
-- Safe to re-run: upserts sections by (term_id, crn) and refreshes meetings.
-- Paths assume repo layout:
-    data/raw/uvm_current_sections_cleaned.csv
+- NOW supports many-to-many instructor assignments via section_instructors.
+- Safe to re-run: upserts sections by (term_id, crn), refreshes meetings,
+  and idempotently links instructors to sections.
+
+Paths assume repo layout:
+    data/processed/uvm_current_sections_cleaned.csv
     data/processed/university_courses.db
 """
 
@@ -49,6 +52,21 @@ def semester_title(s):
 def ensure_dirs():
     (REPO_ROOT / "data" / "processed").mkdir(parents=True, exist_ok=True)
 
+def smart_instructor_split(instructor_field: str) -> list[str]:
+    """
+    UVM 'Instructor' sometimes contains multiple names in one cell.
+    We avoid splitting on commas (since names are 'Last, First').
+    Split on obvious separators: ';', '/', ' & ', ' and '.
+    """
+    s = (instructor_field or "").strip()
+    if not s:
+        return []
+    # Normalize some common delimiters
+    for delim in [" / ", " & ", " and "]:
+        s = s.replace(delim, ";")
+    parts = [p.strip() for p in s.split(";") if p.strip()]
+    return parts or [instructor_field.strip()]
+
 # === Schema ===
 def ensure_schema(conn: sqlite3.Connection):
     conn.executescript("""
@@ -79,7 +97,7 @@ def ensure_schema(conn: sqlite3.Connection):
       name          TEXT NOT NULL,
       netid         TEXT,
       email         TEXT,
-      UNIQUE (name, netid, email)   -- no expressions in UNIQUE for SQLite
+      UNIQUE (name, netid, email)
     );
 
     CREATE TABLE IF NOT EXISTS sections (
@@ -106,11 +124,20 @@ def ensure_schema(conn: sqlite3.Connection):
       location     TEXT
     );
 
+    -- NEW: robust many-to-many mapping for instructors per section
+    CREATE TABLE IF NOT EXISTS section_instructors (
+      section_id    INTEGER NOT NULL REFERENCES sections(section_id) ON DELETE CASCADE,
+      instructor_id INTEGER NOT NULL REFERENCES instructors(instructor_id) ON DELETE CASCADE,
+      role          TEXT, -- optional ('Primary', 'TA', etc.)
+      PRIMARY KEY (section_id, instructor_id)
+    );
+
     CREATE INDEX IF NOT EXISTS idx_courses_subject_number ON courses(subject_id, course_number);
     CREATE INDEX IF NOT EXISTS idx_courses_title ON courses(title);
     CREATE INDEX IF NOT EXISTS idx_sections_term_course ON sections(term_id, course_id);
     CREATE INDEX IF NOT EXISTS idx_sections_crn ON sections(crn);
     CREATE INDEX IF NOT EXISTS idx_instructors_name ON instructors(name);
+    CREATE INDEX IF NOT EXISTS idx_si_instructor ON section_instructors(instructor_id);
     """)
     conn.commit()
 
@@ -135,6 +162,12 @@ def upsert_section(conn: sqlite3.Connection, vals: tuple):
             current_enrollment=excluded.current_enrollment
     """, vals)
 
+def link_instructor_to_section(conn: sqlite3.Connection, section_id: int, instructor_id: int, role: str | None = None):
+    conn.execute("""
+        INSERT OR IGNORE INTO section_instructors(section_id, instructor_id, role)
+        VALUES (?, ?, ?)
+    """, (section_id, instructor_id, role))
+
 def load_current_csv(conn: sqlite3.Connection, csv_path: Path) -> tuple[int, int]:
     inserted = 0
     updated = 0
@@ -154,9 +187,12 @@ def load_current_csv(conn: sqlite3.Connection, csv_path: Path) -> tuple[int, int
             bldg = (row.get("Bldg") or "").strip() or None
             room = (row.get("Room") or "").strip() or None
             location = (row.get("Location") or "").strip() or None
-            instructor_name = (row.get("Instructor") or "").strip()
+
+            # Instructor fields (may contain one or many names)
+            instructor_field = (row.get("Instructor") or "").strip()
             netid = (row.get("NetId") or "").strip() or None
             email = (row.get("Email") or "").strip() or None
+
             max_enrl = to_int_or_none(row.get("Max Enrollment"))
             cur_enrl = to_int_or_none(row.get("Current Enrollment"))
             semester = semester_title(row.get("Semester"))
@@ -190,21 +226,16 @@ def load_current_csv(conn: sqlite3.Connection, csv_path: Path) -> tuple[int, int
                 (subject_id, number, title),
             )
 
-            # instructor (optional)
-            instructor_id = None
-            if instructor_name:
-                instructor_id = get_or_create(
-                    conn,
-                    "SELECT instructor_id FROM instructors WHERE name=? AND netid IS ? AND email IS ?",
-                    "INSERT INTO instructors(name, netid, email) VALUES(?, ?, ?)",
-                    (instructor_name, netid, email),
-                )
-                # NOTE: We are not linking instructor to section yet (can add a junction table later).
-
             # sections upsert
-            pre = conn.execute("SELECT section_id FROM sections WHERE term_id=? AND crn=?", (term_id, crn)).fetchone()
+            pre = conn.execute(
+                "SELECT section_id FROM sections WHERE term_id=? AND crn=?",
+                (term_id, crn)
+            ).fetchone()
             upsert_section(conn, (course_id, term_id, crn, lec_lab, credits_min, credits_max, max_enrl, cur_enrl))
-            post = conn.execute("SELECT section_id FROM sections WHERE term_id=? AND crn=?", (term_id, crn)).fetchone()
+            post = conn.execute(
+                "SELECT section_id FROM sections WHERE term_id=? AND crn=?",
+                (term_id, crn)
+            ).fetchone()
 
             if pre is None and post is not None:
                 inserted += 1
@@ -220,13 +251,26 @@ def load_current_csv(conn: sqlite3.Connection, csv_path: Path) -> tuple[int, int
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (section_id, start_time, end_time, days, bldg, room, location))
 
+            # instructors: multiple names supported (many-to-many)
+            instructor_names = smart_instructor_split(instructor_field)
+            for name in instructor_names:
+                if not name:
+                    continue
+                instr_id = get_or_create(
+                    conn,
+                    "SELECT instructor_id FROM instructors WHERE name=? AND netid IS ? AND email IS ?",
+                    "INSERT INTO instructors(name, netid, email) VALUES(?, ?, ?)",
+                    (name, netid, email),
+                )
+                link_instructor_to_section(conn, section_id, instr_id, role=None)
+
     conn.commit()
     return inserted, updated
 
 def main():
     ensure_dirs()
     if not RAW_CSV.exists():
-        raise FileNotFoundError(f"Could not find CSV at {RAW_CSV}. Place 'uvm_current_sections_cleaned.csv' in data/raw/")
+        raise FileNotFoundError(f"Could not find CSV at {RAW_CSV}. Place 'uvm_current_sections_cleaned.csv' in data/processed/")
     conn = sqlite3.connect(DB_PATH)
     try:
         ensure_schema(conn)
