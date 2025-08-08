@@ -1,0 +1,14 @@
+/* Make the app full-width (override Vite starter constraints) */
+#root {
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Keep the dark theme + chips */
+:root { color-scheme: dark; }
+body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: #111; color: #eee; }
+
+.chip { padding: 2px 6px; border-radius: 999px; font-size: 12px; border: 1px solid #333; }
+.chip.open { background: #163; border-color: #2a5; color: #cfc; }
+.chip.closed { background: #401; border-color: #a35; color: #fbd; }
