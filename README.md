@@ -1,5 +1,3 @@
-Here’s a **basic, clean `README.md`** you can drop in right now:
-
 ```markdown
 # CatBase
 
