@@ -1,0 +1,60 @@
+# === Python ===
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# === Virtual Environments ===
+venv/
+env/
+.venv/
+
+# === OS / Editor Files ===
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+*.code-workspace
+
+# === Logs / Temp Files ===
+*.log
+*.tmp
+*.bak
+*.old
+
+# === Environment & Config Files ===
+.env
+*.env.*
+config.json
+secrets.json
+
+# === Databases ===
+*.db
+*.sqlite
+*.sqlite3
+
+# === CSV / Data Dumps ===
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# === Node / Frontend ===
+node_modules/
+build/
+dist/
+.npm/
+.cache/
+package-lock.json
+yarn.lock
+
+# === Coverage / Test ===
+htmlcov/
+.coverage
+*.cover
+*.py,cover
+.cache
+pytest_cache/
