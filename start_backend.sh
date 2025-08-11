@@ -8,6 +8,7 @@ export FRONTEND_ORIGIN="http://localhost:5173"   # or 3000; optional
 python backend/scraper/fetch_current.py
 python backend/scripts/clean_current.py
 python backend/scripts/ingest_uvm_current.py
+python backend/scraper/rmp_scrape.py
 
 # Start backend
 python -m backend.app

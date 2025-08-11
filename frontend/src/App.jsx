@@ -15,6 +15,9 @@ export default function App() {
     minCredits: undefined,
     maxCredits: undefined,
     status: "", // "open" | "closed" | ""
+    rmpMinRating: undefined,
+    rmpMinCount: undefined,
+    rmpMaxDifficulty: undefined,
   });
 
   const [state, setState] = useState({
@@ -32,6 +35,10 @@ export default function App() {
       semester: filters.semester || undefined,
       year: filters.year,
       search: filters.search || undefined,
+      // RMP filters (backend should treat NULL RMP as pass-through)
+      rmp_min_rating: filters.rmpMinRating,
+      rmp_min_count: filters.rmpMinCount,
+      rmp_max_difficulty: filters.rmpMaxDifficulty,
     };
 
     setState((s) => ({ ...s, loading: true, error: "" }));

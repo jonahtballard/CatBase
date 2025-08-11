@@ -160,3 +160,53 @@ body {
   font-size: 13px;
 }
 .site-footer strong { color: var(--uvm-green); }
+
+/* ===== RMP badges ===== */
+.rmp-badges { margin-top: 6px; display: grid; grid-template-columns: 1fr; gap: 6px; }
+.rmp-pill { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; background: #f0f5f2; border: 1px solid var(--border); border-radius: 999px; padding: 6px 10px; font-size: 12px; color: var(--text); }
+.rmp-pill.compact .name { font-weight: 600; }
+.rmp-pill .name-link { color: var(--uvm-green-600); text-decoration: none; font-weight: 600; }
+.rmp-pill .name-link:hover { text-decoration: underline; }
+.rmp-pill .sep { color: var(--muted); }
+.rmp-pill.muted { background: #f7f7f7; color: var(--muted); }
+.rmp-pill.loading { background: #f7f7f7; color: var(--muted); font-style: italic; }
+
+
+/* --- RMP filter block polish --- */
+.sidebar .divider {
+  height: 1px;
+  background: var(--border);
+  margin: 10px 0 14px;
+}
+
+.sidebar .rmp-group .group-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.sidebar .rmp-group .field {
+  margin-bottom: 8px;
+}
+
+.sidebar .rmp-group input[type="number"],
+.sidebar .rmp-group input[type="text"],
+.sidebar .rmp-group select {
+  width: 100%;
+}
+
+.sidebar .hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* ensure the buttons area has space above it */
+.sidebar .actions {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
