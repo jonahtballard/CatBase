@@ -2,7 +2,7 @@ import SectionCard from "./SectionCard";
 import Pagination from "./Pagination";
 
 export default function Results({ items, total, limit, offset, onPage }) {
-  // group by course (subject+number+title)
+  // Group by course (subject+number+title)
   const byCourse = items.reduce((acc, s) => {
     const key = `${s.subject}:${s.course_number}:${s.title}`;
     if (!acc[key]) {
@@ -16,13 +16,24 @@ export default function Results({ items, total, limit, offset, onPage }) {
   }, {});
   const groups = Object.values(byCourse);
 
-  const shown = (offset || 0) + (items?.length || 0);
-  const totalText = Number.isFinite(total) && total > 0 ? total : shown;
+  // Range display
+  const pageSize = limit || 50;
+  const rawEnd = (offset || 0) + (items?.length || 0);
+  const start = (items?.length || 0) === 0 ? 0 : (offset || 0) + 1;
+
+  // If backend total looks "fishy" (e.g., equals just this page length), fall back to end
+  const looksFishy = Number.isFinite(total) && total > 0 && total <= (items?.length || 0);
+  const hasTotal = Number.isFinite(total) && total > 0 && !looksFishy;
+
+  const end = hasTotal ? Math.min(rawEnd, total) : rawEnd;
+  const totalText = hasTotal ? total : end;
 
   return (
     <section style={{ flex: 1, padding: 16 }}>
-      <div style={{ marginBottom: 12, opacity: 0.8 }}>
-        Showing <b>{Math.min(totalText, shown)}</b> of <b>{totalText}</b> results
+      <div style={{ marginBottom: 12, color: "#6b7280" }}>
+        {totalText === 0
+          ? "No results found"
+          : `Showing ${start} – ${end} of ${totalText} results`}
       </div>
 
       {groups.map(({ course, sections }) => (
@@ -34,8 +45,8 @@ export default function Results({ items, total, limit, offset, onPage }) {
       ))}
 
       <Pagination
-        total={total}
-        limit={limit}
+        total={hasTotal ? total : undefined}
+        limit={pageSize}
         offset={offset}
         itemsLength={items?.length || 0}
         onChange={onPage}

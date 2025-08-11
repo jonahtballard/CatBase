@@ -26,7 +26,7 @@ export default function App() {
 
   useEffect(() => {
     const params = {
-      limit: 50, // ensure request always uses 50 even if state changes elsewhere
+      limit: 50,
       offset: filters.offset,
       subject: filters.subject || undefined,
       semester: filters.semester || undefined,
@@ -67,31 +67,49 @@ export default function App() {
   }, [filters]);
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", color: "#eee", background: "#111" }}>
+    <div className="app">
       <Filters value={filters} onChange={setFilters} />
-      <main style={{ flex: 1 }}>
-        <header style={{ padding: 16, borderBottom: "1px solid #222" }}>
-          <h1 style={{ margin: 0 }}>CatBase</h1>
-          <div style={{ opacity: 0.7, fontSize: 12 }}>
-            Backend: <code>{import.meta.env.VITE_API_URL}</code>
-          </div>
+      <main className="main">
+        {/* Header with only the CatBase logo */}
+        <header
+          className="header light"
+          style={{
+            background: "#fff",
+            padding: "10px 20px",
+            display: "flex",
+            alignItems: "center",
+            borderBottom: "1px solid #ddd"
+          }}
+        >
+          <img
+            src="/CatBase.png"
+            alt="CatBase Logo"
+            style={{
+              height: "70px",
+              width: "auto",
+              objectFit: "contain"
+            }}
+          />
         </header>
 
-        {state.error && <div style={{ color: "tomato", padding: 16 }}>Error: {state.error}</div>}
-
+        {state.error && <div className="error">Error: {state.error}</div>}
         {state.loading ? (
-          <div style={{ padding: 16 }}>Loading…</div>
+          <div className="loading">Loading…</div>
         ) : (
           <Results
             items={state.items}
             total={state.total}
-            limit={50} // pass fixed page size to pagination
+            limit={50}
             offset={filters.offset}
             onPage={(newOffset) => setFilters((f) => ({ ...f, offset: newOffset }))}
           />
         )}
+
+        {/* Footer */}
+        <footer className="site-footer" style={{ marginTop: "20px", textAlign: "center", fontSize: "0.9rem", color: "#555" }}>
+          <div>Created by <strong>Jonah Ballard</strong></div>
+        </footer>
       </main>
     </div>
   );
 }
-

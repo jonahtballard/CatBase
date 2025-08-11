@@ -19,63 +19,63 @@ export default function Filters({ value, onChange }) {
   const v = value;
 
   function update(patch) {
-    onChange({ ...v, ...patch, offset: 0 }); // reset page when filters change
+    onChange({ ...v, ...patch, offset: 0 });
   }
 
   return (
-    <aside style={{ width: 300, padding: 16, borderRight: "1px solid #222" }}>
-      <h3 style={{ margin: "8px 0 12px" }}>Search & Filters</h3>
+    <aside className="sidebar">
+      <h3 className="sidebar-title">Search & Filters</h3>
 
-      <label style={{ display: "block", marginBottom: 8 }}>
-        Search Courses
+      <label className="field">
+        <span>Search Courses</span>
         <input
+          className="input"
           value={v.search || ""}
           onChange={(e) => update({ search: e.target.value })}
           placeholder="e.g., MATH 1010, Smith"
-          style={{ width: "100%", marginTop: 6, padding: 8 }}
         />
       </label>
 
-      <label style={{ display: "block", margin: "12px 0 8px" }}>
-        Subject
+      <label className="field">
+        <span>Subject</span>
         <select
+          className="select"
           value={v.subject || ""}
           onChange={(e) => update({ subject: e.target.value || undefined })}
-          style={{ width: "100%", marginTop: 6, padding: 8 }}
         >
-        <option value="">Any subject</option>
-        {subjects.map((s) => (
-          <option key={s.subject_id} value={s.code}>
-            {s.code}
-          </option>
-        ))}
+          <option value="">Any subject</option>
+          {subjects.map((s) => (
+            <option key={s.subject_id} value={s.code}>
+              {s.code}
+            </option>
+          ))}
         </select>
       </label>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-        <label>
-          Semester
+      <div className="grid2">
+        <label className="field">
+          <span>Semester</span>
           <select
+            className="select"
             value={v.semester || ""}
             onChange={(e) => update({ semester: e.target.value || undefined })}
-            style={{ width: "100%", marginTop: 6, padding: 8 }}
           >
             <option value="">Any</option>
-            {semesters.map((s) => (
+            {["Spring", "Summer", "Fall", "Winter"].map((s) => (
               <option key={s} value={s}>
                 {s}
               </option>
             ))}
           </select>
         </label>
-        <label>
-          Year
+        <label className="field">
+          <span>Year</span>
           <select
+            className="select"
             value={v.year || ""}
             onChange={(e) =>
               update({ year: e.target.value ? Number(e.target.value) : undefined })
             }
-            style={{ width: "100%", marginTop: 6, padding: 8 }}
           >
             <option value="">Any</option>
             {years.map((y) => (
@@ -87,10 +87,11 @@ export default function Filters({ value, onChange }) {
         </label>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 12 }}>
-        <label>
-          Min Credits
+      <div className="grid2">
+        <label className="field">
+          <span>Min Credits</span>
           <input
+            className="input"
             type="number"
             min="0"
             step="0.5"
@@ -100,12 +101,12 @@ export default function Filters({ value, onChange }) {
                 minCredits: e.target.value === "" ? undefined : Number(e.target.value),
               })
             }
-            style={{ width: "100%", marginTop: 6, padding: 8 }}
           />
         </label>
-        <label>
-          Max Credits
+        <label className="field">
+          <span>Max Credits</span>
           <input
+            className="input"
             type="number"
             min="0"
             step="0.5"
@@ -115,17 +116,16 @@ export default function Filters({ value, onChange }) {
                 maxCredits: e.target.value === "" ? undefined : Number(e.target.value),
               })
             }
-            style={{ width: "100%", marginTop: 6, padding: 8 }}
           />
         </label>
       </div>
 
-      <label style={{ display: "block", marginTop: 12 }}>
-        Status
+      <label className="field">
+        <span>Status</span>
         <select
+          className="select"
           value={v.status || ""}
           onChange={(e) => update({ status: e.target.value || undefined })}
-          style={{ width: "100%", marginTop: 6, padding: 8 }}
         >
           <option value="">Any status</option>
           <option value="open">Open</option>
@@ -133,14 +133,15 @@ export default function Filters({ value, onChange }) {
         </select>
       </label>
 
-      <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-        <button onClick={() => onChange({ ...v })} style={{ padding: "8px 12px" }}>
+      <div className="row gap">
+        <button className="btn btn-primary" onClick={() => onChange({ ...v })}>
           Search Courses
         </button>
         <button
+          className="btn btn-outline"
           onClick={() =>
             onChange({
-              limit: 50,      // keep fixed
+              limit: 50,
               offset: 0,
               search: "",
               subject: "",
@@ -151,13 +152,13 @@ export default function Filters({ value, onChange }) {
               status: "",
             })
           }
-          style={{ padding: "8px 12px" }}
         >
-          Reset Filters
+          Reset
         </button>
       </div>
     </aside>
   );
 }
+
 
 
