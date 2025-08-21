@@ -1,6 +1,4 @@
-Perfect — here’s the **final recruiter-friendly README** with a clean **Tech Stack** section added:
 
----
 
 # CatBase – UVM Course Explorer
 
