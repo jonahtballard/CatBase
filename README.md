@@ -1,68 +1,46 @@
-```markdown
-# CatBase
-
-CatBase is a University of Vermont (UVM) course search and exploration tool.  
-It combines current and historical course data into a searchable database, with filters for semester, year, credits, and instructor.
-
-## Features
-- Search courses by subject, number, or title
-- Filter by semester, year, credits, and instructor
-- Live enrollment data for the current term
-- Historical course data back to 1995
-
-## Project Structure
-```
-
-backend/        # Flask backend and API
-frontend/       # (Optional) React frontend
-data/raw/       # Raw source data (not committed to Git)
-data/processed/ # Cleaned/normalized data (not committed to Git)
-
-````
-
-## Getting Started
-
-### 1. Clone the repository
-```bash
-git clone https://github.com/jonahtballard/CatBase.git
-cd CatBase
-````
-
-### 2. Set up the backend
-
-```bash
-cd backend
-python3 -m venv venv
-source venv/bin/activate   # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-python app.py
-```
-
-Backend will run at: `http://localhost:5000`
-
-### 3. (Optional) Set up the frontend
-
-```bash
-cd frontend
-npm install
-npm start
-```
-
-Frontend will run at: `http://localhost:3000`
-
-## Data
-
-Data files in `data/raw` and `data/processed` are ignored in Git.
-Use the included scripts in `backend/scripts` to fetch and process data from UVM sources.
-
-## License
-
-MIT
-
-```
+Perfect — here’s the **final recruiter-friendly README** with a clean **Tech Stack** section added:
 
 ---
 
-Do you want me to make you **an even shorter 5-line README** for now,  
-and then later we can expand it once CatBase is fully wired up? That’s a common early-stage pattern.
-```
+# CatBase – UVM Course Explorer
+
+## 📌 Overview
+
+**CatBase** is a full-stack web application that transforms decades of University of Vermont (UVM) course data into an interactive, searchable platform. It makes academic planning and analysis seamless by combining a modern React frontend, a Flask API backend, and a robust database of normalized historical and current course data.
+
+---
+
+## ✨ What It Does
+
+* 🔍 **Search & Filter**: Explore courses across semesters by professor, department, level, and more.
+* 📊 **Historical Insights**: Visualize enrollment trends and demand patterns spanning 30+ years.
+* 🧑‍🏫 **Professor Context**: Integrated with RateMyProfessor ratings for decision support.
+* 🌐 **User-Friendly UI**: Clean, responsive design styled after UVM’s branding.
+* ⚡ **API-Driven**: Data accessible for research, dashboards, or integrations.
+
+---
+
+## 🏫 Real-World Impact
+
+CatBase turns raw academic records into a practical tool for:
+
+* **Students**: Plan courses with better knowledge of professors, availability, and demand.
+* **Advisors**: Support students with data-backed academic guidance.
+* **Researchers**: Analyze enrollment and department growth patterns over time.
+* **Universities**: Demonstrate transparency by making institutional data more accessible.
+
+---
+
+## 🛠️ Tech Stack
+
+* **Frontend**: React, TailwindCSS
+* **Backend**: Flask (Python), REST API
+* **Database**: PostgreSQL / SQLite
+* **Data Pipeline**: Python (Pandas, SQLAlchemy, Requests)
+
+---
+
+## 👤 Author
+
+**Jonah Ballard**
+[GitHub](https://github.com/jonahtballard) | [LinkedIn](https://www.linkedin.com/in/jonah-ballard/)
