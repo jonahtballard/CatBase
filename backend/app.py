@@ -3,6 +3,7 @@ from flask_cors import CORS
 import os
 
 # Use RELATIVE imports so we don't clash with the third-party "routes" package
+from .routes.analytics import analytics_bp
 from .routes.meta import meta_bp
 from .routes.subjects import subjects_bp
 from .routes.terms import terms_bp
@@ -28,6 +29,8 @@ def create_app():
     app.register_blueprint(meetings_bp,    url_prefix="/api")
     app.register_blueprint(sections_bp,    url_prefix="/api")
     app.register_blueprint(courses_bp,     url_prefix="/api")  # comment out if not needed
+    app.register_blueprint(analytics_bp, url_prefix="/api")
+
 
     # Simple root to prove the server is alive
     @app.get("/")

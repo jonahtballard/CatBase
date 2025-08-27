@@ -78,23 +78,57 @@ def parse_term_from_filename(name):
     return pd.NA, pd.NA
 
 def standardize_columns(df):
-    # Rename common variants
+    # 1) Normalize/strip whitespace in ALL column names up front
+    df = df.copy()
+    df.columns = [re.sub(r"\s+", " ", str(c)).strip() for c in df.columns]
+
+    # 2) Rename common variants to the standard names we use everywhere
     rename_map = {}
     for col in df.columns:
-        low = col.strip().lower()
-        if low == "dept":
+        low = col.lower()
+
+        # Subj mapping: handles "Dept", "Department", "Subject", "Subject Code", "Subj"
+        if low in {"dept", "department", "subject", "subject code", "subj"}:
             rename_map[col] = "Subj"
-        elif low in {"#", "course", "course #", "course number"}:
+
+        # Course number mapping
+        elif low in {"#", "course", "course #", "course number", "crse"}:
             rename_map[col] = "Number"
+
+        # Lec/Lab mapping
         elif low in {"leclab", "lec/lab", "lec lab"}:
             rename_map[col] = "Lec Lab"
-        elif low == "comp numb":
+
+        # Component / CRN mapping
+        elif low in {"comp numb", "component number", "crn"}:
             rename_map[col] = "Comp Numb"
-        elif low == "max enrollment":
+
+        # Enrollments
+        elif low in {"max enrollment", "max enroll", "max cap"}:
             rename_map[col] = "Max Enrollment"
-        elif low == "current enrollment":
+        elif low in {"current enrollment", "curr enrollment", "enrolled"}:
             rename_map[col] = "Current Enrollment"
+
+        # Location bits (optional but nice to normalize)
+        elif low in {"bldg", "building"}:
+            rename_map[col] = "Bldg"
+        elif low in {"room", "rm"}:
+            rename_map[col] = "Room"
+
+        # Contact fields
+        elif low in {"netid", "net id"}:
+            rename_map[col] = "NetId"
+        elif low in {"email", "e-mail", "email address"}:
+            rename_map[col] = "Email"
+
+        # Times (catch simple variants)
+        elif low in {"start time", "start"}:
+            rename_map[col] = "Start Time"
+        elif low in {"end time", "end"}:
+            rename_map[col] = "End Time"
+
     return df.rename(columns=rename_map)
+
 
 def clean_dataframe(df, filename):
     df = standardize_columns(df)

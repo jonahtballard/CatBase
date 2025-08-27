@@ -27,6 +27,20 @@ export default function App() {
     error: "",
   });
 
+  // Ensure Home always uses the latest term on load
+  useEffect(() => {
+    let mounted = true;
+    getJSON("/terms").then((ts) => {
+      if (!mounted || !ts.length) return;
+      const t = ts[0]; // assuming API returns newest first
+      // Adjust these keys to match your state shape:
+      setFilters((f) => ({ ...f, semester: t.semester, year: t.year }));
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   useEffect(() => {
     const params = {
       limit: 50,
@@ -77,7 +91,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <Filters value={filters} onChange={setFilters} />
+      <Filters value={filters} onChange={setFilters} mode="current" />
       <main className="main">
         {/* Header with only the CatBase logo */}
         <header
