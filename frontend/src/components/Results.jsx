@@ -2,46 +2,54 @@ import SectionCard from "./SectionCard";
 import Pagination from "./Pagination";
 
 export default function Results({ items, total, limit, offset, onPage }) {
-  // Group by course (subject+number+title)
+  const pageSize = limit || 50;
+
+  // Group by course (subject + number + title)
   const byCourse = items.reduce((acc, s) => {
     const key = `${s.subject}:${s.course_number}:${s.title}`;
     if (!acc[key]) {
       acc[key] = {
-        course: { subject: s.subject, course_number: s.course_number, title: s.title },
+        course: {
+          subject: s.subject,
+          course_number: s.course_number,
+          title: s.title,
+        },
         sections: [],
       };
     }
     acc[key].sections.push(s);
     return acc;
   }, {});
-  const groups = Object.values(byCourse);
 
-  // Range display
-  const pageSize = limit || 50;
-  const rawEnd = (offset || 0) + (items?.length || 0);
-  const start = (items?.length || 0) === 0 ? 0 : (offset || 0) + 1;
+  const grouped = Object.values(byCourse);
 
-  // If backend total looks "fishy" (e.g., equals just this page length), fall back to end
-  const looksFishy = Number.isFinite(total) && total > 0 && total <= (items?.length || 0);
-  const hasTotal = Number.isFinite(total) && total > 0 && !looksFishy;
-
-  const end = hasTotal ? Math.min(rawEnd, total) : rawEnd;
-  const totalText = hasTotal ? total : end;
+  // Header range text: “1–50 of 123”, “1–9 of 9”, “51–100 of 137”, etc.
+  const hasTotal = Number.isFinite(total) && total >= 0;
+  const pageStart = total === 0 ? 0 : offset + 1;
+  const pageEnd = hasTotal
+    ? Math.min(offset + pageSize, total)
+    : offset + (items?.length || 0);
 
   return (
-    <section style={{ flex: 1, padding: 16 }}>
-      <div style={{ marginBottom: 12, color: "#6b7280" }}>
-        {totalText === 0
-          ? "No results found"
-          : `Showing ${start} – ${end} of ${totalText} results`}
+    <section>
+      <div
+        className="results-meta"
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "baseline",
+          margin: "10px 0 16px",
+        }}
+      >
+        <h2 style={{ margin: 0 }}>
+          {hasTotal
+            ? `${pageStart}–${pageEnd} of ${total} results`
+            : `${pageStart}–${pageEnd} results`}
+        </h2>
       </div>
 
-      {groups.map(({ course, sections }) => (
-        <SectionCard
-          key={`${course.subject}-${course.course_number}-${course.title}`}
-          course={course}
-          sections={sections}
-        />
+      {grouped.map(({ course, sections }, idx) => (
+        <SectionCard key={`${course.subject}:${course.course_number}:${idx}`} course={course} sections={sections} />
       ))}
 
       <Pagination

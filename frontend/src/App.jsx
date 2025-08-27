@@ -4,7 +4,7 @@ import Results from "./components/Results";
 import { getJSON } from "./lib/api";
 
 export default function App() {
-  // Fixed page size: 50
+  // Server-side pagination size: 50
   const [filters, setFilters] = useState({
     limit: 50,
     offset: 0,
@@ -35,7 +35,13 @@ export default function App() {
       semester: filters.semester || undefined,
       year: filters.year,
       search: filters.search || undefined,
-      // RMP filters (backend should treat NULL RMP as pass-through)
+
+      // PUSH ALL FILTERS SERVER-SIDE (fixes pagination)
+      min_credits: filters.minCredits,
+      max_credits: filters.maxCredits,
+      status: filters.status || undefined,
+
+      // RMP filters (NULL should pass)
       rmp_min_rating: filters.rmpMinRating,
       rmp_min_count: filters.rmpMinCount,
       rmp_max_difficulty: filters.rmpMaxDifficulty,
@@ -45,25 +51,9 @@ export default function App() {
 
     getJSON("/sections", params)
       .then((data) => {
-        let items = data.items || [];
-
-        // client-side extras
-        if (filters.minCredits != null) {
-          items = items.filter((s) => (s.credits_min ?? 0) >= filters.minCredits);
-        }
-        if (filters.maxCredits != null) {
-          items = items.filter((s) => (s.credits_max ?? s.credits_min ?? 0) <= filters.maxCredits);
-        }
-        if (filters.status === "open") {
-          items = items.filter((s) => (s.current_enrollment ?? 0) < (s.max_enrollment ?? 0));
-        }
-        if (filters.status === "closed") {
-          items = items.filter((s) => (s.current_enrollment ?? 0) >= (s.max_enrollment ?? 0));
-        }
-
         setState({
-          items,
-          total: data.total ?? items.length,
+          items: data.items || [],
+          total: data.total || 0,
           loading: false,
           error: "",
         });
@@ -71,7 +61,19 @@ export default function App() {
       .catch((e) =>
         setState({ items: [], total: 0, loading: false, error: e.message })
       );
-  }, [filters]);
+  }, [
+    filters.offset,
+    filters.subject,
+    filters.semester,
+    filters.year,
+    filters.search,
+    filters.minCredits,
+    filters.maxCredits,
+    filters.status,
+    filters.rmpMinRating,
+    filters.rmpMinCount,
+    filters.rmpMaxDifficulty,
+  ]);
 
   return (
     <div className="app">
@@ -85,36 +87,46 @@ export default function App() {
             padding: "10px 20px",
             display: "flex",
             alignItems: "center",
-            borderBottom: "1px solid #ddd"
+            borderBottom: "1px solid #ddd",
           }}
         >
           <img
             src="/CatBase.png"
             alt="CatBase Logo"
-            style={{
-              height: "70px",
-              width: "auto",
-              objectFit: "contain"
-            }}
+            style={{ height: "70px", width: "auto", objectFit: "contain" }}
           />
         </header>
 
-        {state.error && <div className="error">Error: {state.error}</div>}
-        {state.loading ? (
-          <div className="loading">Loading…</div>
-        ) : (
-          <Results
-            items={state.items}
-            total={state.total}
-            limit={50}
-            offset={filters.offset}
-            onPage={(newOffset) => setFilters((f) => ({ ...f, offset: newOffset }))}
-          />
+        {state.error && (
+          <div className="error" role="alert">
+            {state.error}
+          </div>
         )}
 
+        {/* Results */}
+        <Results
+          items={state.items}
+          total={state.total}
+          limit={50}
+          offset={filters.offset}
+          onPage={(newOffset) =>
+            setFilters((f) => ({ ...f, offset: newOffset }))
+          }
+        />
+
         {/* Footer */}
-        <footer className="site-footer" style={{ marginTop: "20px", textAlign: "center", fontSize: "0.9rem", color: "#555" }}>
-          <div>Created by <strong>Jonah Ballard</strong></div>
+        <footer
+          className="site-footer"
+          style={{
+            marginTop: "20px",
+            textAlign: "center",
+            fontSize: "0.9rem",
+            color: "#555",
+          }}
+        >
+          <div>
+            Created by <strong>Jonah Ballard</strong>
+          </div>
         </footer>
       </main>
     </div>
