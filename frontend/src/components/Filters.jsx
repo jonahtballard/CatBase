@@ -26,6 +26,7 @@ export default function Filters({ value, onChange }) {
     <aside className="sidebar">
       <h3 className="sidebar-title">Search & Filters</h3>
 
+      {/* Search */}
       <label className="field">
         <span>Search Courses</span>
         <input
@@ -36,6 +37,7 @@ export default function Filters({ value, onChange }) {
         />
       </label>
 
+      {/* Subject */}
       <label className="field">
         <span>Subject</span>
         <select
@@ -52,6 +54,7 @@ export default function Filters({ value, onChange }) {
         </select>
       </label>
 
+      {/* Semester / Year */}
       <div className="grid2">
         <label className="field">
           <span>Semester</span>
@@ -61,13 +64,14 @@ export default function Filters({ value, onChange }) {
             onChange={(e) => update({ semester: e.target.value || undefined })}
           >
             <option value="">Any</option>
-            {["Spring", "Summer", "Fall", "Winter"].map((s) => (
+            {semesters.map((s) => (
               <option key={s} value={s}>
                 {s}
               </option>
             ))}
           </select>
         </label>
+
         <label className="field">
           <span>Year</span>
           <select
@@ -87,6 +91,7 @@ export default function Filters({ value, onChange }) {
         </label>
       </div>
 
+      {/* Min/Max credits */}
       <div className="grid2">
         <label className="field">
           <span>Min Credits</span>
@@ -103,6 +108,7 @@ export default function Filters({ value, onChange }) {
             }
           />
         </label>
+
         <label className="field">
           <span>Max Credits</span>
           <input
@@ -120,6 +126,7 @@ export default function Filters({ value, onChange }) {
         </label>
       </div>
 
+      {/* Status */}
       <label className="field">
         <span>Status</span>
         <select
@@ -133,6 +140,70 @@ export default function Filters({ value, onChange }) {
         </select>
       </label>
 
+      {/* ---- RMP filters block (clean + stacked) ---- */}
+      <div className="divider"></div>
+
+      <label className="field">
+        <span>Min RMP Rating</span>
+        <input
+          className="input"
+          type="number"
+          min="0"
+          max="5"
+          step="0.1"
+          value={v.rmpMinRating ?? ""}
+          onChange={(e) =>
+            update({
+              rmpMinRating:
+                e.target.value === "" ? undefined : Number(e.target.value),
+            })
+          }
+          placeholder="e.g., 3.5"
+        />
+      </label>
+
+      <label className="field">
+        <span>Min # Ratings</span>
+        <input
+          className="input"
+          type="number"
+          min="0"
+          step="1"
+          value={v.rmpMinCount ?? ""}
+          onChange={(e) =>
+            update({
+              rmpMinCount:
+                e.target.value === "" ? undefined : Number(e.target.value),
+            })
+          }
+          placeholder="e.g., 10"
+        />
+      </label>
+
+      <label className="field">
+        <span>Max Difficulty</span>
+        <input
+          className="input"
+          type="number"
+          min="0"
+          max="5"
+          step="0.1"
+          value={v.rmpMaxDifficulty ?? ""}
+          onChange={(e) =>
+            update({
+              rmpMaxDifficulty:
+                e.target.value === "" ? undefined : Number(e.target.value),
+            })
+          }
+          placeholder="e.g., 3.0"
+        />
+      </label>
+
+      <p className="hint">
+        Note: instructors with no RMP data are never filtered out.
+      </p>
+
+      {/* Actions */}
       <div className="row gap">
         <button className="btn btn-primary" onClick={() => onChange({ ...v })}>
           Search Courses
@@ -150,6 +221,9 @@ export default function Filters({ value, onChange }) {
               minCredits: undefined,
               maxCredits: undefined,
               status: "",
+              rmpMinRating: undefined,
+              rmpMinCount: undefined,
+              rmpMaxDifficulty: undefined,
             })
           }
         >
@@ -159,6 +233,3 @@ export default function Filters({ value, onChange }) {
     </aside>
   );
 }
-
-
-

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import clsx from "clsx";
+import InstructorRMP from "./InstructorRMP";
 
 export default function SectionCard({ course, sections }) {
   const [open, setOpen] = useState(false);
@@ -59,6 +60,12 @@ export default function SectionCard({ course, sections }) {
                 <div className="section-col">
                   <div className="label">Instructors</div>
                   <div>{(s.instructors || []).map((i) => i.name).join(", ") || "TBA"}</div>
+                  {/* RMP stats per instructor */}
+                  <div className="rmp-badges">
+                    {(s.instructors || []).map((inst, idx) => (
+                      <InstructorRMP key={inst.instructor_id || inst.id || inst.name || idx} instructor={inst} />
+                    ))}
+                  </div>
                 </div>
 
                 <div className="section-col">
@@ -73,4 +80,3 @@ export default function SectionCard({ course, sections }) {
     </div>
   );
 }
-
